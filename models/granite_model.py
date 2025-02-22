@@ -1,23 +1,22 @@
 import json
 from datetime import datetime, timedelta
-from ibm_watson_machine_learning.foundation_models import Model
-from ibm_watson_machine_learning.foundation_models import Model
+import requests
 from config import IBM_GRANITE_API_KEY, IBM_GRANITE_URL, IBM_WML_PROJECT_ID
 
 # Ensure all credentials are set
 if not IBM_GRANITE_API_KEY or not IBM_GRANITE_URL or not IBM_WML_PROJECT_ID:
     raise ValueError("IBM Granite API Key, URL, or Project ID is missing.")
 
-# Initialize Watson Machine Learning Credentials
-wml_credentials = {
-    "url": "https://eu-de.ml.cloud.ibm.com",  # Replace with your actual URL
-    "apikey": IBM_GRANITE_API_KEY, # Replace with your actual API key
-    "space_id": "3c6fac64-6bb1-4cdb-ad3e-24bd5eeb5f08"  # Replace with your actual Space ID
-}
-
-# Initialize the Granite Model
-granite_model = Model("granite-13b-chat", credentials=wml_credentials)
-
+# API Call Function
+def call_granite_api(prompt):
+    url = f"{IBM_GRANITE_URL}/v1/watson/generative-models/granite/chat"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {IBM_GRANITE_API_KEY}"
+    }
+    data = {"messages": [{"role": "user", "content": prompt}]}
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response")
 
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist):
@@ -29,8 +28,8 @@ def chat_with_ai(user_message, checklist):
     - Respond as a strategic business consultant.
     Format output as JSON containing `response` (advice text) and `updated_checklist` (task list with modifications).
     """
-
-    response = granite_model.generate_text(prompt=prompt)
+    
+    response = call_granite_api(prompt)
     try:
         response_data = json.loads(response) if response else {}
         return response_data.get("response", ""), response_data.get("updated_checklist", [])
@@ -50,8 +49,7 @@ def generate_business_checklist(user_input):
     Each task should have a category, priority level (high, medium, low), estimated completion time in days, and an ID.
     Format output as JSON.
     """
-
-    response = granite_model.generate_text(prompt=prompt)
+    response = call_granite_api(prompt)
     try:
         return json.loads(response) if response else []
     except json.JSONDecodeError:
@@ -86,8 +84,7 @@ def predict_business_growth(user_input):
     The user is running a business with the following details: {user_input}
     Predict the business growth over the next 12 months and provide a percentage growth rate.
     """
-    response = granite_model.generate_text(prompt=prompt)
-    
+    response = call_granite_api(prompt)
     try:
         return float(response.strip('%')) / 100 if "%" in response else float(response) / 100
     except ValueError:
