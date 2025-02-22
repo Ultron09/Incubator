@@ -1,7 +1,6 @@
 from .granite_model import (
     call_gemini_api,
     chat_with_ai,
-    generate_business_checklist,
     assign_deadlines,
     mark_task_completed,
     assign_task_to_member,
@@ -11,7 +10,6 @@ from .granite_model import (
 __all__ = [
     "call_gemini_api",
     "chat_with_ai",
-    "generate_business_checklist",
     "assign_deadlines",
     "mark_task_completed",
     "assign_task_to_member",
