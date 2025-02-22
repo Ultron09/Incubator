@@ -6,21 +6,30 @@ from config import GEMINI_API_KEY
 # Configure Gemini API Key
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Function to call Gemini API
-def call_gemini_api(prompt):
-    try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt)
+import json
+import re
 
-        if response and hasattr(response, "text"):
-            return response.text.strip()
-        elif response and response.candidates:
-            return response.candidates[0].content.parts[0].text.strip() if response.candidates[0].content.parts else "No response"
-        else:
-            return "No response from Gemini API."
-    except Exception as e:
-        print(f"Error while calling Gemini API: {e}")
-        return json.dumps({"error": "Error calling Gemini API", "details": str(e)})
+def clean_ai_response(raw_response):
+    """Removes backticks and ensures valid JSON format"""
+    json_match = re.search(r'```json\s*(\{.*\})\s*```', raw_response, re.DOTALL)
+    if json_match:
+        return json_match.group(1)  # Extract clean JSON content
+    return raw_response  # Return original if no match found
+
+def chat_with_ai(user_message):
+    raw_response = call_gemini_api(user_message)
+    
+    # Clean AI response
+    cleaned_response = clean_ai_response(raw_response)
+
+    # Ensure AI response is valid JSON
+    try:
+        response_data = json.loads(cleaned_response)
+        return response_data.get("response", ""), response_data.get("updated_checklist", [])
+    except json.JSONDecodeError as e:
+        print(f"Error parsing AI response: {e}, Raw response: {raw_response}")
+        return "Error parsing AI response", []
+
 
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist=None):
