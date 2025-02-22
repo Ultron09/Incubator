@@ -17,7 +17,7 @@ def call_gemini_api(prompt):
     # Send the prompt to Gemini API model
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",  # Assuming model name is "gemini-2.0-flash"
+            model="gemini-1.5-flash",  # Assuming model name is "gemini-2.0-flash"
             contents=prompt
         )
         
