@@ -59,7 +59,7 @@ def chat_with_ai(user_message, checklist=None):
         checklist (list, optional): Current checklist of tasks.
 
     Returns:
-        tuple: (AI response as a string, Updated checklist as a list)
+        tuple: (AI response as a string, Updated checklist as a list, Function call as None)
     """
     if checklist is None:
         checklist = []
@@ -90,20 +90,19 @@ def chat_with_ai(user_message, checklist=None):
         try:
             ai_text = raw_response["candidates"][0]["content"]["parts"][0]["text"]
         except (KeyError, IndexError, TypeError):
-            return "Error: Unexpected API response structure", []
+            return "Error: Unexpected API response structure", [], None
     else:
-        return "Error: Unexpected API response format", []
+        return "Error: Unexpected API response format", [], None
 
     # Clean and process AI response
     cleaned_response = clean_ai_response(ai_text)
 
     try:
         response_data = json.loads(cleaned_response)
-        return response_data.get("response", ""), response_data.get("updated_checklist", [])
+        return response_data.get("response", ""), response_data.get("updated_checklist", []), None
     except json.JSONDecodeError as e:
         print(f"Error parsing AI response: {e}, Raw response: {ai_text}")
-        return "Error parsing AI response", []
-
+        return "Error parsing AI response", [], None
 
 def validate_checklist(checklist):
     """
