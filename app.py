@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from models.granite_model import generate_business_checklist, chat_with_ai, predict_business_growth
+from models.granite_model import chat_with_ai, predict_business_growth
 
 app = Flask(__name__)
 
