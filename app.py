@@ -21,19 +21,17 @@ def chat():
     """Handles AI-driven business consulting chat."""
     data = request.get_json()
     user_message = data.get("message", "")
-    
-    # Log the received message for debugging
-    print(f"Received message: {user_message}")
+    checklist = data.get("checklist", [])  # Get the checklist from the request
     
     if not user_message:
         return jsonify({"error": "Message is required"}), 400
     
-    response = chat_with_ai(user_message)
+    if checklist is None:
+        checklist = []  # Make sure the checklist is not None
     
-    # Log the AI response for debugging
-    print(f"AI response: {response}")
-    
+    response = chat_with_ai(user_message, checklist)
     return jsonify({"response": response})
+
 
 
 @app.route("/predict-growth", methods=["POST"])
