@@ -1,11 +1,11 @@
-pip>=24
-setuptools>=65
+pip>=24.0
+setuptools>=65.0
 wheel
-Flask==3.1.0
+Flask==3.0.1
 matplotlib
 numpy==1.26.4
-cython
-meson 
+Cython
+meson
 ninja
 pandas>=2.1.3
 ibm-watson-machine-learning
@@ -13,4 +13,4 @@ google-api-python-client==2.160.0
 google-auth==2.38.0
 pydantic==2.10.6
 requests==2.32.3
-Werkzeug==3.1.3
+Werkzeug==3.0.3
