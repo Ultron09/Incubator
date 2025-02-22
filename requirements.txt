@@ -15,3 +15,4 @@ requests==2.32.3
 Werkzeug==3.0.3
 python-dotenv
 genai==0.1.0  # Gemini API SDK for Python
+ipython_genutils
