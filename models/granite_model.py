@@ -1,21 +1,23 @@
 import json
 from datetime import datetime, timedelta
 from ibm_watson_machine_learning.foundation_models import Model
-from config import IBM_GRANITE_API_KEY
-from config import IBM_GRANITE_URL# Ensure this is correctly set
+from ibm_watson_machine_learning.foundation_models import Model
+from config import IBM_GRANITE_API_KEY, IBM_GRANITE_URL, IBM_WML_PROJECT_ID
 
-# Ensure the API key is set
-if not IBM_GRANITE_API_KEY:
-    raise ValueError("IBM_GRANITE_API_KEY is missing. Please check your environment variables.")
+# Ensure all credentials are set
+if not IBM_GRANITE_API_KEY or not IBM_GRANITE_URL or not IBM_WML_PROJECT_ID:
+    raise ValueError("IBM Granite API Key, URL, or Project ID is missing.")
 
-# Initialize the Granite model correctly
-granite_model = Model(
-    "granite-13b-chat",
-    credentials={
-        "apikey": IBM_GRANITE_API_KEY,
-        "url": IBM_GRANITE_URL  # Add this line
-    }
-)
+# Initialize Watson Machine Learning Credentials
+wml_credentials = {
+    "apikey": IBM_GRANITE_API_KEY,
+    "url": IBM_GRANITE_URL,
+    "project_id": IBM_WML_PROJECT_ID  # Use project_id for proper auth
+}
+
+# Initialize the Granite Model
+granite_model = Model("granite-13b-chat", credentials=wml_credentials)
+
 
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist):
