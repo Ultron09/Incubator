@@ -1,7 +1,8 @@
 import json
 from datetime import datetime, timedelta
 from ibm_watson_machine_learning.foundation_models import Model
-from config import IBM_GRANITE_API_KEY  # Ensure this is correctly set
+from config import IBM_GRANITE_API_KEY
+from config import IBM_GRANITE_URL# Ensure this is correctly set
 
 # Ensure the API key is set
 if not IBM_GRANITE_API_KEY:
