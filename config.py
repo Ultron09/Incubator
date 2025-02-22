@@ -1,12 +1,5 @@
 import os
-from ibm_watson_machine_learning import APIClient
 
-# Fetching credentials from environment variables
-wml_credentials = {
-    "apikey": os.getenv("WML_APIKEY"),
-    "url": os.getenv("WML_URL"),
-    "project_id": os.getenv("WML_PROJECT_ID")
-}
-
-# Initialize the IBM Watson Machine Learning Client
-client = APIClient(wml_credentials)
+IBM_GRANITE_API_KEY = os.getenv("IBM_GRANITE_API_KEY")
+IBM_GRANITE_URL = os.getenv("IBM_GRANITE_URL")
+IBM_WML_PROJECT_ID = os.getenv("IBM_WML_PROJECT_ID")  # Add this line
