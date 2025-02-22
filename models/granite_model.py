@@ -10,9 +10,9 @@ if not IBM_GRANITE_API_KEY or not IBM_GRANITE_URL or not IBM_WML_PROJECT_ID:
 
 # Initialize Watson Machine Learning Credentials
 wml_credentials = {
-    "apikey": IBM_GRANITE_API_KEY,
-    "url": IBM_GRANITE_URL,
-    "project_id": IBM_WML_PROJECT_ID  # Use project_id for proper auth
+    "url": "https://eu-de.ml.cloud.ibm.com",  # Replace with your actual URL
+    "apikey": IBM_GRANITE_API_KEY, # Replace with your actual API key
+    "space_id": "3c6fac64-6bb1-4cdb-ad3e-24bd5eeb5f08"  # Replace with your actual Space ID
 }
 
 # Initialize the Granite Model
