@@ -1,13 +1,12 @@
 from flask import Flask, request, jsonify
 from models.granite_model import generate_business_checklist, chat_with_ai, predict_business_growth
 from config import GEMINI_API_KEY, GEMINI_API_URL
+import requests
+import json
 
 app = Flask(__name__)
 
 # API Call Function to Gemini (if not already imported in the model)
-import requests
-import json
-
 def call_gemini_api(prompt):
     """Call Gemini API to get AI response for a given prompt"""
     url = f"{GEMINI_API_URL}/v1/gemini/generative-models/gemini/chat"
@@ -16,8 +15,14 @@ def call_gemini_api(prompt):
         "Authorization": f"Bearer {GEMINI_API_KEY}"
     }
     data = {"messages": [{"role": "user", "content": prompt}]}
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response")
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        if response.status_code == 200:
+            return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response")
+        else:
+            return f"Error {response.status_code}: {response.text}"
+    except Exception as e:
+        return f"Error calling Gemini API: {str(e)}"
 
 # AI-powered Business Consultant Chatbot
 @app.route("/chat", methods=["POST"])
@@ -65,4 +70,4 @@ def predict_growth():
 
 # Ensure the app is running on the appropriate host and port
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
