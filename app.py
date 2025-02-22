@@ -1,44 +1,79 @@
 from flask import Flask, request, jsonify
-from models.granite_model import get_granite_response
-from models.gemini_model import get_gemini_response
-from database.progress_model import update_progress, get_user_progress
-from flask_cors import CORS
+import google.generativeai as genai
+import os
+import requests
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend communication
 
-@app.route("/business_insights/<ai_type>", methods=["GET"])
-def business_insights(ai_type):
-    query = request.args.get("query")
-    if not query:
-        return jsonify({"error": "Query is required"}), 400
+# Configure IBM Granite API
+genai.configure(api_key=os.getenv("GRANITE_API_KEY"))
 
-    if ai_type == "granite":
-        response = get_granite_response(query)
-    elif ai_type == "gemini":
-        response = get_gemini_response(query)
-    else:
-        return jsonify({"error": "Invalid AI type. Use 'granite' or 'gemini'."}), 400
+def get_granite_response(prompt: str):
+    """Get AI response from IBM Granite"""
+    model = genai.GenerativeModel("gemini-pro")  # Replace this if using a different Granite model
+    response = model.generate_content(prompt)
+    return response.text if response else "Error generating response"
 
-    return jsonify({"generated_text": response})
-
-@app.route("/progress/update", methods=["POST"])
-def update_progress_route():
+@app.route("/generate", methods=["POST"])
+def generate():
+    """Generates AI response for a given prompt."""
     data = request.get_json()
-    if not data or not all(k in data for k in ["user_id", "task", "status"]):
-        return jsonify({"error": "Missing required fields (user_id, task, status)"}), 400
+    prompt = data.get("prompt", "")
+    
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
 
-    update_progress(data["user_id"], data["task"], data["status"])
-    return jsonify({"message": "Progress updated successfully"})
+    response = get_granite_response(prompt)
+    return jsonify({"response": response})
 
-@app.route("/progress/get", methods=["GET"])
-def get_progress_route():
-    user_id = request.args.get("user_id")
-    if not user_id:
-        return jsonify({"error": "User ID is required"}), 400
+@app.route("/analyze-trends", methods=["GET"])
+def analyze_trends():
+    """Fetches trending hashtags or topics."""
+    # Dummy response – integrate with a social media API if needed
+    trends = ["#AI", "#MachineLearning", "#StartupGrowth"]
+    return jsonify({"trends": trends})
 
-    progress = get_user_progress(user_id)
-    return jsonify({"progress": progress})
+@app.route("/schedule-post", methods=["POST"])
+def schedule_post():
+    """Schedules a post with AI-optimized content."""
+    data = request.get_json()
+    content = data.get("content", "")
+    time = data.get("time", "")
+
+    if not content or not time:
+        return jsonify({"error": "Content and time are required"}), 400
+
+    # Normally, you'd store this in a DB or queue system
+    return jsonify({"status": "Post scheduled", "content": content, "time": time})
+
+@app.route("/generate-cv", methods=["POST"])
+def generate_cv():
+    """Generates a CV based on provided user data."""
+    data = request.get_json()
+    name = data.get("name", "")
+    skills = data.get("skills", [])
+    experience = data.get("experience", [])
+
+    if not name or not skills or not experience:
+        return jsonify({"error": "Incomplete data"}), 400
+
+    cv_template = f"Name: {name}\nSkills: {', '.join(skills)}\nExperience:\n"
+    for job in experience:
+        cv_template += f"- {job}\n"
+
+    return jsonify({"cv": cv_template})
+
+@app.route("/generate-business-plan", methods=["POST"])
+def generate_business_plan():
+    """Generates a business plan for startups using AI."""
+    data = request.get_json()
+    idea = data.get("idea", "")
+    
+    if not idea:
+        return jsonify({"error": "Business idea is required"}), 400
+
+    response = get_granite_response(f"Create a business plan for: {idea}")
+    return jsonify({"business_plan": response})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
