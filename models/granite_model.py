@@ -12,6 +12,7 @@ granite_model = Model.from_pretrained(
     model_id="granite-13b-chat",
     api_key=IBM_GRANITE_API_KEY
 )
+
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist):
     prompt = f"""
@@ -23,9 +24,12 @@ def chat_with_ai(user_message, checklist):
     Format output as JSON containing `response` (advice text), `updated_checklist` (task list with modifications).
     """
     
-    response = granite_model.generate(prompt)
-    response_data = json.loads(response) if isinstance(response, str) else response
-    return response_data.get("response", ""), response_data.get("updated_checklist", [])
+    response = granite_model.generate_text(prompt=prompt)
+    try:
+        response_data = json.loads(response) if response else {}
+        return response_data.get("response", ""), response_data.get("updated_checklist", [])
+    except json.JSONDecodeError:
+        return "Error parsing AI response", []
 
 # AI-generated business checklist
 def generate_business_checklist(user_input):
@@ -41,8 +45,11 @@ def generate_business_checklist(user_input):
     Format output as JSON.
     """
     
-    response = granite_model.generate(prompt)
-    return json.loads(response) if isinstance(response, str) else response
+    response = granite_model.generate_text(prompt=prompt)
+    try:
+        return json.loads(response) if response else []
+    except json.JSONDecodeError:
+        return []
 
 # Assign deadlines dynamically
 def assign_deadlines(checklist, start_date=datetime.now()):
@@ -73,7 +80,7 @@ def predict_business_growth(user_input):
     The user is running a business with the following details: {user_input}
     Predict the business growth over the next 12 months and provide a percentage growth rate.
     """
-    response = granite_model.generate(prompt)
+    response = granite_model.generate_text(prompt=prompt)
     
     try:
         return float(response.strip('%')) / 100 if "%" in response else float(response) / 100
