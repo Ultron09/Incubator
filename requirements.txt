@@ -10,7 +10,7 @@ ninja
 pandas>=2.1.4
 ibm-watson-machine-learning
 google-api-python-client==2.160.0
-google-auth==2.38.
+google-auth==2.38.1
 pydantic==2.10.6
 requests==2.32.3
 Werkzeug==3.1.3
