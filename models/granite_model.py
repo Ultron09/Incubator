@@ -8,7 +8,13 @@ if not IBM_GRANITE_API_KEY:
     raise ValueError("IBM_GRANITE_API_KEY is missing. Please check your environment variables.")
 
 # Initialize the Granite model correctly
-granite_model = Model("granite-13b-chat", credentials={"apikey": IBM_GRANITE_API_KEY})
+granite_model = Model(
+    "granite-13b-chat",
+    credentials={
+        "apikey": IBM_GRANITE_API_KEY,
+        "url": IBM_GRANITE_URL  # Add this line
+    }
+)
 
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist):
