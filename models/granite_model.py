@@ -12,13 +12,15 @@ def call_gemini_api(prompt):
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(prompt)
         
-        if response and response.candidates:
-            return response.candidates[0].content
+        if response and hasattr(response, "text"):  # Ensure it's a string
+            return response.text.strip()
+        elif response and response.candidates:
+            return response.candidates[0].content.parts[0].text.strip() if response.candidates[0].content.parts else "No response"
         else:
             return "No response from Gemini API."
     except Exception as e:
         print(f"Error while calling Gemini API: {e}")
-        return "Error calling Gemini API"
+        return json.dumps({"error": "Error calling Gemini API", "details": str(e)})
 
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist=None):
