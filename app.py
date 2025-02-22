@@ -22,11 +22,19 @@ def chat():
     data = request.get_json()
     user_message = data.get("message", "")
     
+    # Log the received message for debugging
+    print(f"Received message: {user_message}")
+    
     if not user_message:
         return jsonify({"error": "Message is required"}), 400
     
     response = chat_with_ai(user_message)
+    
+    # Log the AI response for debugging
+    print(f"AI response: {response}")
+    
     return jsonify({"response": response})
+
 
 @app.route("/predict-growth", methods=["POST"])
 def predict_growth():
