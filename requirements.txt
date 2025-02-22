@@ -3,6 +3,7 @@ setuptools>=65
 wheel
 Flask==3.1.0
 cython
+pandas>=2.1.4
 ibm-watson-machine-learning
 google-api-python-client==2.160.0
 google-auth==2.38.0
