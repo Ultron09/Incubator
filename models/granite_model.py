@@ -2,10 +2,14 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import json
 from ibm_watson_machine_learning.foundation_models import Model
+import os
+from config import IBM_GRANITE_API_KEY  # Ensure config.py is properly imported
+# Ensure the API key is provided correctly
+if not IBM_GRANITE_API_KEY:
+    raise ValueError("IBM_GRANITE_API_KEY is missing. Please check your environment variables.")
 
-# Initialize IBM Watson Granite model
-granite_model = Model(model_id="granite-13b-chat")
-
+# Initialize the model with credentials
+granite_model = Model(model_id="granite-13b-chat", credentials={"apikey": IBM_GRANITE_API_KEY})
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist):
     prompt = f"""
