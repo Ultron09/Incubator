@@ -1,17 +1,14 @@
 import json
 from datetime import datetime, timedelta
 from ibm_watson_machine_learning.foundation_models import Model
-import os
-from config import IBM_GRANITE_API_KEY  # Ensure config.py is properly imported
+from config import IBM_GRANITE_API_KEY  # Ensure this is correctly set
 
 # Ensure the API key is set
 if not IBM_GRANITE_API_KEY:
     raise ValueError("IBM_GRANITE_API_KEY is missing. Please check your environment variables.")
 
-granite_model = Model.from_pretrained(
-    model_id="granite-13b-chat",
-    api_key=IBM_GRANITE_API_KEY
-)
+# Initialize the Granite model correctly
+granite_model = Model("granite-13b-chat", credentials={"apikey": IBM_GRANITE_API_KEY})
 
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist):
@@ -21,9 +18,9 @@ def chat_with_ai(user_message, checklist):
     - Suggest any updates to their current checklist.
     - If necessary, modify task deadlines based on new priorities.
     - Respond as a strategic business consultant.
-    Format output as JSON containing `response` (advice text), `updated_checklist` (task list with modifications).
+    Format output as JSON containing `response` (advice text) and `updated_checklist` (task list with modifications).
     """
-    
+
     response = granite_model.generate_text(prompt=prompt)
     try:
         response_data = json.loads(response) if response else {}
@@ -44,7 +41,7 @@ def generate_business_checklist(user_input):
     Each task should have a category, priority level (high, medium, low), estimated completion time in days, and an ID.
     Format output as JSON.
     """
-    
+
     response = granite_model.generate_text(prompt=prompt)
     try:
         return json.loads(response) if response else []
