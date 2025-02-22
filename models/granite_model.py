@@ -8,16 +8,10 @@ from config import IBM_GRANITE_API_KEY  # Ensure config.py is properly imported
 if not IBM_GRANITE_API_KEY:
     raise ValueError("IBM_GRANITE_API_KEY is missing. Please check your environment variables.")
 
-# Define Granite API URL (Update if needed)
-granite_url = "https://eu-de.ml.cloud.ibm.com"
-
-# Initialize the model with credentials (Koyeb environment variables will be used)
-granite_model = Model(
+granite_model = Model.from_pretrained(
     model_id="granite-13b-chat",
-    credentials={"apikey": IBM_GRANITE_API_KEY},
-    url=granite_url
+    api_key=IBM_GRANITE_API_KEY
 )
-
 # AI-powered Business Consultant Chatbot
 def chat_with_ai(user_message, checklist):
     prompt = f"""
