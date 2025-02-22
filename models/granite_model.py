@@ -2,24 +2,36 @@ import json
 from datetime import datetime, timedelta
 import requests
 from config import GEMINI_API_KEY, GEMINI_API_URL
+import genai
+
 
 # Ensure all credentials are set
 if not GEMINI_API_KEY or not GEMINI_API_URL:
     raise ValueError("Gemini API Key or URL is missing.")
 
-# API Call Function
+# API Call Function to interact with Gemini API
 def call_gemini_api(prompt):
-    url = f"{GEMINI_API_URL}/v1/gemini/generative-models/gemini/chat"  # Update with the correct Gemini endpoint
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {GEMINI_API_KEY}"
-    }
-    data = {"messages": [{"role": "user", "content": prompt}]}
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response")
+    # Create the client instance using the API key from environment
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    
+    # Send the prompt to Gemini API model
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",  # Assuming model name is "gemini-2.0-flash"
+            contents=prompt
+        )
+        
+        # If response is successful, return the text from the response
+        if response and response.text:
+            return response.text
+        else:
+            return "No response from Gemini API."
+    except Exception as e:
+        print(f"Error while calling Gemini API: {e}")
+        return "Error calling Gemini API"
 
 # AI-powered Business Consultant Chatbot
-def chat_with_ai(user_message, checklist):
+def chat_with_ai(user_message, checklist=None):
     prompt = f"""
     The user is running a business and has the following query: {user_message}
     - Provide business guidance on the next step they should take.
@@ -30,8 +42,10 @@ def chat_with_ai(user_message, checklist):
     """
     
     response = call_gemini_api(prompt)
+    
+    # Attempt to parse the response, if it's in JSON format
     try:
-        response_data = json.loads(response) if response else {}
+        response_data = json.loads(response)
         return response_data.get("response", ""), response_data.get("updated_checklist", [])
     except json.JSONDecodeError:
         return "Error parsing AI response", []
@@ -49,13 +63,16 @@ def generate_business_checklist(user_input):
     Each task should have a category, priority level (high, medium, low), estimated completion time in days, and an ID.
     Format output as JSON.
     """
+    
     response = call_gemini_api(prompt)
+    
+    # Try to parse the response as JSON and return the checklist
     try:
         return json.loads(response) if response else []
     except json.JSONDecodeError:
         return []
 
-# Assign deadlines dynamically
+# Assign deadlines dynamically to tasks in the checklist
 def assign_deadlines(checklist, start_date=datetime.now()):
     for task in checklist:
         task["deadline"] = str(start_date + timedelta(days=task.get("estimated_days", 0)))
@@ -84,8 +101,12 @@ def predict_business_growth(user_input):
     The user is running a business with the following details: {user_input}
     Predict the business growth over the next 12 months and provide a percentage growth rate.
     """
+    
     response = call_gemini_api(prompt)
+    
+    # Try to parse the growth prediction and return the growth rate
     try:
+        # Strip out the percentage sign and convert to float
         return float(response.strip('%')) / 100 if "%" in response else float(response) / 100
     except ValueError:
-        return 0.0  # Default growth if parsing fails
+        return 0.0  # Return default growth if parsing fails
