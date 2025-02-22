@@ -12,7 +12,7 @@ if not IBM_GRANITE_API_KEY or not IBM_GRANITE_URL or not IBM_WML_PROJECT_ID:
 wml_credentials = {
     "apikey": IBM_GRANITE_API_KEY,
     "url": IBM_GRANITE_URL,
-    "space_id": IBM_WML_PROJECT_ID  # Use project_id for proper auth
+    "project_id": IBM_WML_PROJECT_ID  # Use project_id for proper auth
 }
 
 # Initialize the Granite Model
