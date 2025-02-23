@@ -7,42 +7,29 @@ tasks = []  # In-memory task list (replace with database integration if needed)
 @app.route('/chat', methods=['POST'])
 def chat():
     """Handles AI-driven business consulting chat and task management."""
-    try:
-        data = request.get_json()  # Get the request body
-        print(f"Received data: {data}")  # Log for debugging
-        
-        user_message = data.get("message")
-        checklist = data.get("checklist", [])  # Default to empty checklist if not provided
+    data = request.get_json()
+    user_message = data.get("message")
+    checklist = data.get("checklist", [])
 
-        # Ensure a message is provided
-        if not user_message:
-            return jsonify({"error": "Message is required", "response": None, "updated_checklist": checklist, "tasks": tasks}), 400
+    if not user_message:
+        return jsonify({"error": "Message is required", "response": None, "updated_checklist": checklist, "tasks": tasks}), 400
 
-        # Call the chat_with_ai function to get the response and updated checklist
-        response, updated_checklist, function_call = chat_with_ai(user_message, checklist)
+    response, updated_checklist, function_call = chat_with_ai(user_message, checklist)
 
-        # Structure the result for response
-        result = {"response": response, "updated_checklist": updated_checklist, "tasks": tasks}
+    result = {"response": response, "updated_checklist": updated_checklist, "tasks": tasks}
 
-        # Handle function calls (like task creation, update, delete)
-        if function_call:
-            func_name = function_call.get('name')
-            func_args = function_call.get('args', {})
+    if function_call:
+        func_name = function_call.get('name')
+        func_args = function_call.get('args', {})
 
-            if func_name == 'create_task':
-                result.update(create_task(func_args.get('title'), func_args.get('description')))
-            elif func_name == 'update_task':
-                result.update(update_task(func_args.get('task_id'), func_args.get('title'), func_args.get('description')))
-            elif func_name == 'delete_task':
-                result.update(delete_task(func_args.get('task_id')))
+        if func_name == 'create_task':
+            result.update(create_task(func_args.get('title'), func_args.get('description')))
+        elif func_name == 'update_task':
+            result.update(update_task(func_args.get('task_id'), func_args.get('title'), func_args.get('description')))
+        elif func_name == 'delete_task':
+            result.update(delete_task(func_args.get('task_id')))
 
-        return jsonify(result)
-
-    except Exception as e:
-        # General exception handling in case of errors
-        print(f"Error: {e}")
-        return jsonify({"error": "An unexpected error occurred", "response": None, "updated_checklist": [], "tasks": []}), 500
-
+    return jsonify(result)
 
 
 def create_task(title, description):
