@@ -8,6 +8,7 @@ tasks = []  # In-memory task list (replace with database integration if needed)
 def chat():
     """Handles AI-driven business consulting chat and task management."""
     data = request.get_json()
+    print(f"Received data: {data}") 
     user_message = data.get("message")
     checklist = data.get("checklist", [])
 
