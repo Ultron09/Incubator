@@ -68,15 +68,37 @@ def chat_with_ai(user_message, checklist=None):
     {{
         "response": "Your next step is to secure funding...",
         "updated_checklist": [
-            {{"id": 1, "task": "Register business", "priority": "high"}}
+            {{ "id": 1, "task": "Register business", "priority": "high" }}
         ]
     }}
     """
     
-    raw_response = call_gemini_api(prompt)
+    try:
+        raw_response = call_gemini_api(prompt)
 
-    # Process the AI response as needed
-    # Ensure you handle cases where the checklist is empty
+        if not raw_response:
+            raise ValueError("Empty response from Gemini API")
+
+        # Clean the response to ensure it's valid JSON
+        clean_response = clean_ai_response(raw_response)
+
+        # Try to parse the cleaned response as JSON
+        try:
+            ai_response = json.loads(clean_response)
+        except json.JSONDecodeError:
+            raise ValueError("Failed to decode the response as JSON")
+
+        response = ai_response.get("response", "No advice received.")
+        updated_checklist = ai_response.get("updated_checklist", [])
+        function_call = ai_response.get("function_call", None)
+
+        return response, updated_checklist, function_call
+
+    except Exception as e:
+        print(f"Error in chat_with_ai: {e}")
+        # Ensure we return a valid tuple even if there’s an error
+        return "Error processing your request.", checklist, None
+
 
 def validate_checklist(checklist):
     """
