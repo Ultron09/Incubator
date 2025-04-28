@@ -3,43 +3,28 @@ import re
 import requests
 import os
 from config import GEMINI_API_KEY
-
-# Load the API key from environment variables (if not already loaded)
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", GEMINI_API_KEY)
-GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
-
+import openai
+from openai import OpenAI
+from memory_manager import MemoryTool
+memory_tool = MemoryTool()
+client = openai.OpenAI(
+    base_url="https://api.together.xyz/v1",
+    api_key=os.getenv("TOGETHER_API_KEY"),
+)
+def build_system_context(query):
+    results = memory_tool.search_memory(query, top_k=5, user_id="1to1help")
+    return results
 
 def call_gemini_api(user_input):
-    """
-    Calls the Gemini AI API with the given user input and returns the response.
-    
-    Parameters:
-        user_input (str): The user's message to be processed by Gemini AI.
-
-    Returns:
-        dict: The response from the Gemini API.
-    """
-    if not GEMINI_API_KEY:
-        return {"error": "Missing GEMINI_API_KEY. Set it in environment variables."}
-    
-    headers = {
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "contents": [{"parts": [{"text": user_input}]}]
-    }
-
-    response = requests.post(
-        f"{GEMINI_ENDPOINT}?key={GEMINI_API_KEY}",
-        json=payload,
-        headers=headers
+    system_prompt = f"You are a psychologist I will give u relveant context You need to help user reach a satisfied mental state ,{context} "
+    completion = client.chat.completions.create(
+  model="meta-llama/Llama-Vision-Free",
+  messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_input}
+      ],
     )
-
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return {"error": f"API call failed with status {response.status_code}", "details": response.text}
+    return completion.choices[0].message.content
 
 
 def clean_ai_response(raw_response):
@@ -66,44 +51,18 @@ def chat_with_ai(user_message, checklist=None):
     if checklist is None:
         checklist = []
 
-    prompt = f"""
-    The user is running a business and has the following query: {user_message}
-    - Provide business guidance on the next step they should take.
-    - Suggest any updates to their current checklist.
-    - If necessary, modify task deadlines based on new priorities.
-    - Respond as a strategic business consultant.
-    Format output strictly as a valid JSON object containing:
-    - `response` (string): AI's advice
-    - `updated_checklist` (list): Updated checklist
-
-    Example JSON response:
-    {{
-        "response": "Your next step is to secure funding...",
-        "updated_checklist": [
-            {{"id": 1, "task": "Register business", "priority": "high"}}
-        ]
-    }}
-    """
+    prompt =user_message
 
     raw_response = call_gemini_api(prompt)
 
-    # Ensure raw_response is a dictionary and extract text safely
-    if isinstance(raw_response, dict) and "candidates" in raw_response:
-        try:
-            ai_text = raw_response["candidates"][0]["content"]["parts"][0]["text"]
-        except (KeyError, IndexError, TypeError):
-            return "Error: Unexpected API response structure", [], None
-    else:
-        return "Error: Unexpected API response format", [], None
-
     # Clean and process AI response
-    cleaned_response = clean_ai_response(ai_text)
+    cleaned_response = clean_ai_response(raw_response)
 
     try:
         response_data = json.loads(cleaned_response)
         return response_data.get("response", ""), response_data.get("updated_checklist", []), None
     except json.JSONDecodeError as e:
-        print(f"Error parsing AI response: {e}, Raw response: {ai_text}")
+        print(f"Error parsing AI response: {e}, Raw response: {raw_response}")
         return "Error parsing AI response", [], None
 
 
