@@ -21,3 +21,4 @@ typing
 pymilvus
 transformers
 datetime
+sentence-transformers
