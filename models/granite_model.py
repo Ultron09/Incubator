@@ -3,13 +3,11 @@ import re
 import requests
 import os
 from config import GEMINI_API_KEY
-import openai
-from openai import OpenAI
+from together import Together
 from memory_manager import MemoryTool
 memory_tool = MemoryTool()
-client = openai.OpenAI(
-    base_url="https://api.together.xyz/v1",
-    api_key=os.getenv("TOGETHER_API_KEY"),
+client = Together(
+     api_key=os.getenv("TOGETHER_API_KEY"),
 )
 def build_system_context(query):
     results = memory_tool.search_memory(query, top_k=5, user_id="1to1help")
