@@ -17,3 +17,7 @@ python-dotenv
 google.generativeai
 ipython_genutils
 together
+typing
+pymilvus
+transformers
+datetime
